@@ -403,8 +403,8 @@ switch (mode) {
             publishDir "$index_dir", mode: 'copy', overwrite: true
            
 	    input:
-	    file gn from genome
-	    file gs from genes	
+	    file genome
+	    file genes	
 		 
             output:
             set val("starIndex"), file("*") into star_index
@@ -413,8 +413,8 @@ switch (mode) {
             STAR --runThreadN ${task.cpus} \
                 --runMode genomeGenerate \
                 --genomeDir . \
-                --genomeFastaFiles ${gn} \
-                --sjdbGTFfile ${gs} \
+                --genomeFastaFiles ${genome} \
+                --sjdbGTFfile ${genes} \
                 --sjdbOverhang 99
             """
         }
@@ -437,13 +437,13 @@ switch (mode) {
             publishDir "$index_dir", mode: 'copy', overwrite: true
         
             input:
-	    file gn from genome
+	    file genome
 	   
  	    output:
             set val("bowtieIndex"), file("*") into bowtie_index
             
             """
-            bowtie2-build --threads ${task.cpus} ${gn} genome
+            bowtie2-build --threads ${task.cpus} ${genome} genome
             """
         }   
     
@@ -501,18 +501,17 @@ switch (mode) {
             set sample, file("${sample}_trimmed*.fastq.gz") into read_pairs_trimmed
 
             """
-            ln -s /opt/Trimmomatic-0.39/adapters/*.fa .
-
+            ln -s /usr/local/share/trimmomatic-0.35-6/adapters/*.fa .
             if [[ ${stranded} == "paired-end" ]]
             then
-                java -jar /opt/Trimmomatic-0.39/trimmomatic-0.39.jar PE \
+                trimmomatic PE \
                     -threads ${task.cpus} \
                     ${reads.findAll().join(' ')} \
                     -baseout ${sample}_trimmed.fastq.gz \
                     ${trim_params}
             elif [[ ${stranded} == "single-end" ]]
             then
-                java -jar /opt/Trimmomatic-0.39/trimmomatic-0.39.jar SE \
+                trimmimatic SE \
                     -threads ${task.cpus} \
                     ${reads.findAll().join(' ')} \
                     ${sample}_trimmed.fastq.gz \
