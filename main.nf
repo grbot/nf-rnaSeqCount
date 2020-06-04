@@ -401,7 +401,11 @@ switch (mode) {
             label 'maxi'
             tag { "Generate Star Index" }
             publishDir "$index_dir", mode: 'copy', overwrite: true
-            
+           
+	    input:
+	    file gn from genome
+	    file gs from genes	
+		 
             output:
             set val("starIndex"), file("*") into star_index
             
@@ -409,8 +413,8 @@ switch (mode) {
             STAR --runThreadN ${task.cpus} \
                 --runMode genomeGenerate \
                 --genomeDir . \
-                --genomeFastaFiles ${genome} \
-                --sjdbGTFfile ${genes} \
+                --genomeFastaFiles ${gn} \
+                --sjdbGTFfile ${gs} \
                 --sjdbOverhang 99
             """
         }
@@ -432,11 +436,14 @@ switch (mode) {
             tag { "Generate Bowtie2 Index" }
             publishDir "$index_dir", mode: 'copy', overwrite: true
         
-            output:
+            input:
+	    file gn from genome
+	   
+ 	    output:
             set val("bowtieIndex"), file("*") into bowtie_index
             
             """
-            bowtie2-build --threads ${task.cpus} ${genome} genome
+            bowtie2-build --threads ${task.cpus} ${gn} genome
             """
         }   
     
