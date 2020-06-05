@@ -635,6 +635,8 @@ switch (mode) {
 
             input:
             file(samples) from sample_bams
+	    file genome
+	    file genes
             
             output:
             file('gene_counts*') into featureCounts
@@ -683,7 +685,10 @@ switch (mode) {
             label 'mini'
             tag { 'MultiQC - ALL' }
             publishDir "${multiqc_dir}", mode: 'copy', overwrite: false
-            
+           
+   	    input:
+	    file out_dir
+ 
             output:
             file('*') into multiQC
             
